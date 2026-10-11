@@ -41,6 +41,14 @@ export default function AppearancePage() {
         </s-paragraph>
         <Form method="post">
           <s-stack direction="block" gap="base">
+            <label className="qc-appearance-color-mode">
+              <span>Color mode</span>
+              <select name="matchStoreColors" defaultValue={settings.matchStoreColors ? "on" : "off"} key={String(settings.matchStoreColors)}>
+                <option value="off">Use my saved colors</option>
+                <option value="on">Automatically match store colors</option>
+              </select>
+            </label>
+            <s-paragraph>Automatic mode follows your storefront theme&apos;s text, background, and button colors. Automatic mode overrides quiz-specific colors. The colors below are used if a theme color cannot be detected. Check the result in your store; the editor preview uses your saved colors.</s-paragraph>
             <s-grid gridTemplateColumns="1fr 1fr" gap="base">
               <s-color-field
                 label="Primary"

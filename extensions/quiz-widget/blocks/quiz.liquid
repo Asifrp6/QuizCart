@@ -2,6 +2,7 @@
   class="quizcart-root"
   data-handle="{{ block.settings.quiz_handle | escape }}"
   data-heading="{{ block.settings.heading | escape }}"
+  data-logo-url="{{ 'quizcart-logo.png' | asset_url | escape }}"
   data-runtime-url="{{ 'quizcart-runtime.js' | asset_url | escape }}"
   role="region"
   aria-label="{{ block.settings.heading | default: 'QuizCart quiz' | escape }}"

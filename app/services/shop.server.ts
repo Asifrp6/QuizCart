@@ -62,6 +62,8 @@ export function resolveAppearance(
   quiz: { primaryColor: string | null; accentColor: string | null },
 ) {
   return {
+    matchStoreColors: settings.matchStoreColors,
+    customColors: Boolean(quiz.primaryColor || quiz.accentColor),
     primaryColor: quiz.primaryColor || settings.primaryColor,
     accentColor: quiz.accentColor || settings.accentColor,
     backgroundColor: settings.backgroundColor,

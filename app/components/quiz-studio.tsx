@@ -298,8 +298,7 @@ export function QuizStudio({
       <div className="qc-builder-layout">
         <aside className="qc-app-sidebar">
           <AppRouteLink href="/app" className="qc-brand">
-            <span className="qc-brand-mark">Q</span>
-            <span>QuizCart</span>
+            <img className="qc-app-logo" src="/quizcart-logo.png" alt="QuizCart" width={120} height={120} />
           </AppRouteLink>
           <nav aria-label="QuizCart navigation" className="qc-side-links">
             <AppRouteLink href="/app">

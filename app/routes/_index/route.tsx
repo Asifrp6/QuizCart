@@ -30,7 +30,7 @@ export default function App() {
   return (
     <div className={styles.index}>
       <div className={styles.content}>
-        <h1 className={styles.heading}>QuizCart</h1>
+        <h1 className={styles.heading}><img src="/quizcart-logo.png" alt="QuizCart" width={200} height={200} style={{ objectFit: "contain" }} /></h1>
         <p className={styles.text}>
           Personalized product quizzes that guide shoppers to the products that
           fit them.

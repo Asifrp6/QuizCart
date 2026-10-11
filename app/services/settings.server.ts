@@ -36,6 +36,7 @@ export async function updateAppearance(shopId: string, form: FormData) {
   return prisma.appSettings.update({
     where: { shopId },
     data: {
+      matchStoreColors: flag(form, "matchStoreColors"),
       primaryColor: color(form, "primaryColor", "#111827"),
       accentColor: color(form, "accentColor", "#008060"),
       backgroundColor: color(form, "backgroundColor", "#ffffff"),

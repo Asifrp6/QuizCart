@@ -46,14 +46,7 @@ export default function Dashboard() {
       <div className="qc-dashboard qc-dashboard-refresh">
         <aside className="qc-dashboard-sidebar">
           <AppRouteLink href="/app" aria-label="QuizCart home">
-            <span className="qc-dashboard-brand">
-              <span className="qc-brand-mark" aria-hidden="true">
-                Q
-              </span>
-              <span>
-                Quiz<span>Cart</span>
-              </span>
-            </span>
+            <img className="qc-app-logo" src="/quizcart-logo.png" alt="QuizCart" width={120} height={120} />
           </AppRouteLink>
 
           <nav className="qc-dashboard-nav" aria-label="Main navigation">

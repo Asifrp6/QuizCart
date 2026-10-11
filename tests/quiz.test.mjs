@@ -727,3 +727,46 @@ test("dragging rejects foreign targets and broken branching before saving", asyn
   );
   assert.equal(writes.length, 0);
 });
+
+
+test("appearance color mode persists on and off through form submissions", async () => {
+  let saved = { matchStoreColors: false };
+  const service = load("app/services/settings.server.ts", {
+    "../db.server": { appSettings: { update: async ({ where, data }) => {
+      assert.equal(where.shopId, "test-shop");
+      saved = { ...saved, ...data };
+      return saved;
+    } } },
+  });
+  for (const mode of ["on", "off", "on"]) {
+    const form = new FormData();
+    form.set("matchStoreColors", mode);
+    await service.updateAppearance("test-shop", form);
+    assert.equal(saved.matchStoreColors, mode === "on");
+  }
+});
+
+
+test("automatic storefront colors override quiz colors and match button text", () => {
+  const source = readFileSync("extensions/quiz-widget/assets/quizcart-runtime.js", "utf8").replace(/\}\)\(\);\s*$/, "globalThis.runtime = { applyTheme }; })();");
+  const values = {};
+  const parent = { parentElement: null };
+  const button = { closest: () => null, getBoundingClientRect: () => ({ width: 100 }) };
+  const style = { color: "rgb(20, 30, 40)", backgroundColor: "rgb(250, 250, 250)", getPropertyValue: () => "" };
+  const context = vm.createContext({
+    document: { readyState: "loading", addEventListener() {}, documentElement: {}, body: {}, querySelectorAll: () => [button] },
+    MutationObserver: class { observe() {} },
+    CSS: { supports: () => true },
+    getComputedStyle: (node) => node === button ? { ...style, backgroundColor: "rgb(15, 90, 70)", color: "rgb(240, 240, 240)" } : style,
+  });
+  vm.runInContext(source, context);
+  const root = { parentElement: parent, style: { setProperty: (key, value) => { values[key] = value; } } };
+  const appearance = { matchStoreColors: true, customColors: true, primaryColor: "#111111", accentColor: "#ff0000", backgroundColor: "#ffffff", textColor: "#111111", buttonRadius: 8 };
+  context.runtime.applyTheme(root, appearance);
+  assert.equal(values["--qc-accent"], "rgb(15, 90, 70)");
+  assert.equal(values["--qc-primary"], "rgb(20, 30, 40)");
+  assert.equal(values["--qc-on-accent"], "rgb(240, 240, 240)");
+  context.runtime.applyTheme(root, { ...appearance, matchStoreColors: false });
+  assert.equal(values["--qc-accent"], "#ff0000");
+  assert.equal(values["--qc-on-accent"], "#ffffff");
+});

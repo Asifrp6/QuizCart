@@ -60,6 +60,7 @@ model AppSettings {
   aiExplanation       Boolean @default(true)
   maxRecommendations  Int     @default(3)
 
+  matchStoreColors Boolean @default(false)
   primaryColor    String  @default("#111827")
   accentColor     String  @default("#008060")
   backgroundColor String  @default("#ffffff")

@@ -524,12 +524,11 @@ function PreviewCard({
 }) {
   return (
     <div className={`quizcart-card ${branded ? "is-branded" : "is-step"}`}>
-      {branded ? (
+      {(
         <div className="quizcart-brand">
-          <span className="quizcart-logo" />
-          <span>QuizCart</span>
+          <img className="quizcart-logo" src="/quizcart-logo.png" alt="QuizCart" width={96} height={96} />
         </div>
-      ) : null}
+      )}
       {children}
     </div>
   );

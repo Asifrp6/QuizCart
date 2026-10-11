@@ -1198,3 +1198,11 @@ s-page {
     display: none;
   }
 }
+
+.qc-app-logo { display: block; width: 120px; height: 120px; object-fit: contain; border-radius: 8px; }
+.qc-app-brand-header { padding: 12px 24px 0; }
+.qc-app-brand-header .qc-app-logo { width: 80px; height: 80px; }
+
+.qc-appearance-color-mode { display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 550; }
+.qc-appearance-color-mode select { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #c9cccf; border-radius: 8px; background: #fff; color: #18283b; font: inherit; }
+.qc-appearance-color-mode select:focus-visible { outline: 2px solid #285de3; outline-offset: 2px; }

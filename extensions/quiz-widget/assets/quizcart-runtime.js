@@ -595,10 +595,17 @@
         });
       }
     }
-    if (branded) {
+    {
       const brand = element(card, "div", "quizcart-brand");
-      element(brand, "span", "quizcart-logo");
-      addText(brand, "span", "", "QuizCart");
+      if (root.dataset?.logoUrl) {
+        const logo = element(brand, "img", "quizcart-logo");
+        logo.src = root.dataset.logoUrl;
+        logo.alt = "QuizCart";
+        logo.width = 96;
+        logo.height = 96;
+      } else {
+        addText(brand, "span", "", "QuizCart");
+      }
     }
     return card;
   }
@@ -616,6 +623,52 @@
     root.style.setProperty("--qc-text", appearance.textColor);
     root.style.setProperty("--qc-radius", `${appearance.buttonRadius}px`);
     root.style.setProperty("--qc-font", appearance.fontFamily || "inherit");
+    root.style.setProperty("--qc-on-accent", "#ffffff");
+    if (appearance.matchStoreColors) matchStoreColors(root);
+    const parentStyle = root.parentElement ? getComputedStyle(root.parentElement) : null;
+    if (parentStyle) {
+      if (appearance.matchStoreColors || !appearance.fontFamily || appearance.fontFamily === "inherit") root.style.setProperty("--qc-font", parentStyle.fontFamily);
+      root.style.setProperty("--qc-font-size", parentStyle.fontSize);
+      root.style.setProperty("--qc-line-height", parentStyle.lineHeight);
+    }
+  }
+
+  function matchStoreColors(root) {
+    const parent = root.parentElement;
+    if (!parent) return;
+    const transparent = (value) => !value || value === "transparent" || /rgba\([^)]*,\s*0\s*\)$/.test(value);
+    const candidates = Array.from(document.querySelectorAll('button[name="add"], .product-form__submit, .button--primary, .btn--primary, .button, .btn, button[type="submit"]'));
+    const themeButton = candidates.find((node) => !node.closest(".quizcart-root") && node.getBoundingClientRect().width > 0 && !transparent(getComputedStyle(node).backgroundColor));
+    const buttonStyle = themeButton ? getComputedStyle(themeButton) : null;
+    const styles = [getComputedStyle(parent)];
+    if (buttonStyle) styles.push(buttonStyle);
+    styles.push(getComputedStyle(document.body), getComputedStyle(document.documentElement));
+    function themeColor(names) {
+      for (const style of styles) {
+        for (const name of names) {
+          const value = style.getPropertyValue(name).trim();
+          if (!value) continue;
+          const color = CSS.supports("color", value) ? value : CSS.supports("color", "rgb(" + value + ")") ? "rgb(" + value + ")" : null;
+          if (color && !transparent(color)) return color;
+        }
+      }
+      return null;
+    }
+    let background = themeColor(["--color-background", "--color-background-primary", "--color-bg"]);
+    for (let node = parent; !background && node; node = node.parentElement) {
+      const color = getComputedStyle(node).backgroundColor;
+      if (!transparent(color)) background = color;
+    }
+    const text = themeColor(["--color-foreground", "--color-text", "--color-text-primary"]) || styles[0].color;
+    const accent = buttonStyle?.backgroundColor || themeColor(["--color-button", "--color-primary", "--color-accent", "--color-btn-primary"]);
+    const onAccent = buttonStyle?.color || themeColor(["--color-button-text", "--color-btn-primary-text"]);
+    if (background) root.style.setProperty("--qc-bg", background);
+    if (text) {
+      root.style.setProperty("--qc-text", text);
+      root.style.setProperty("--qc-primary", text);
+    }
+    if (accent) root.style.setProperty("--qc-accent", accent);
+    if (onAccent) root.style.setProperty("--qc-on-accent", onAccent);
   }
 
   function showError(card, message) {

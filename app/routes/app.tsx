@@ -21,7 +21,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function App() {
   const { apiKey } = useLoaderData<typeof loader>();
-  const { search } = useLocation();
+  const { search, pathname } = useLocation();
 
   return (
     <AppProvider apiKey={apiKey}>
@@ -46,6 +46,9 @@ export default function App() {
           Settings
         </s-link>
       </s-app-nav>
+      {pathname !== "/app" && !/^\/app\/quizzes\/[^/]+$/.test(pathname) ? (
+        <div className="qc-app-brand-header"><a href={withShopifyContext("/app", search)} aria-label="QuizCart home"><img className="qc-app-logo" src="/quizcart-logo.png" alt="QuizCart" width={96} height={96} /></a></div>
+      ) : null}
       <Outlet />
     </AppProvider>
   );
