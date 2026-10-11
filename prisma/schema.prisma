@@ -1,0 +1,288 @@
+// QuizCart data model.
+// SQLite keeps local `shopify app dev` working. Production can switch the
+// datasource to PostgreSQL without changing the models.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+model Shop {
+  id        String   @id @default(cuid())
+  domain    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  settings  AppSettings?
+  quizzes   Quiz[]
+  products  ShopifyProduct[]
+  customers QuizCustomer[]
+  sessions  QuizSession[]
+  events    AnalyticsEvent[]
+}
+
+model AppSettings {
+  id     String @id @default(cuid())
+  shopId String @unique
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  collectName  Boolean @default(true)
+  collectAge   Boolean @default(true)
+  nameRequired Boolean @default(true)
+  ageRequired  Boolean @default(false)
+
+  aiEnabled           Boolean @default(false)
+  recommendationStyle String  @default("best_match")
+  aiExplanation       Boolean @default(true)
+  maxRecommendations  Int     @default(3)
+
+  primaryColor    String  @default("#111827")
+  accentColor     String  @default("#008060")
+  backgroundColor String  @default("#ffffff")
+  textColor       String  @default("#111827")
+  fontFamily      String  @default("inherit")
+  buttonRadius    Int     @default(8)
+  showProgress    Boolean @default(true)
+
+  updatedAt DateTime @updatedAt
+}
+
+model Quiz {
+  id          String @id @default(cuid())
+  shopId      String
+  shop        Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  title       String
+  handle      String
+  description String @default("")
+  status      String @default("draft")
+
+  collectName  Boolean?
+  collectAge   Boolean?
+  nameRequired Boolean?
+  ageRequired  Boolean?
+
+  aiEnabled           Boolean?
+  recommendationStyle String?
+  aiExplanation       Boolean?
+  maxRecommendations  Int?
+
+  welcomeTitle    String @default("Let's find your match")
+  welcomeBody     String @default("Answer a few questions and we'll recommend products that fit you.")
+  welcomeImageUrl String @default("")
+  startButtonText String @default("Start Quiz")
+  showDuration    Boolean @default(true)
+  durationText    String  @default("2 minutes")
+  showPersonalizedBenefit Boolean @default(true)
+  welcomeBenefits String @default("[\"Takes less than 2 minutes\",\"100% personalized results\"]")
+  customerInfoTitle String @default("Let's get to know you")
+  customerInfoBody  String @default("This helps us find the best match for your needs.")
+  ageRangeOptions String @default("[\"Under 18\",\"18 - 25\",\"26 - 35\",\"36 - 45\",\"46+\"]")
+  resultTitle     String @default("Your recommended products")
+  resultBody      String @default("Based on your answers, here are products picked for you.")
+
+  primaryColor String?
+  accentColor  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  questions Question[]
+  rules     LogicRule[]
+  mappings  ProductMapping[]
+  sessions  QuizSession[]
+  events    AnalyticsEvent[]
+
+  @@unique([shopId, handle])
+  @@index([shopId, status])
+}
+
+model Question {
+  id         String         @id @default(cuid())
+  quizId     String
+  quiz       Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  prompt     String
+  helpText   String         @default("")
+  type       String
+  required   Boolean        @default(true)
+  position   Int
+  sliderMin  Int            @default(0)
+  sliderMax  Int            @default(100)
+  sliderStep Int            @default(1)
+  layout     String         @default("auto")
+  answers    Answer[]
+  responses  QuizResponse[]
+
+  @@index([quizId, position])
+}
+
+model Answer {
+  id          String           @id @default(cuid())
+  questionId  String
+  question    Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  label       String
+  description String           @default("")
+  imageUrl    String           @default("")
+  position    Int
+  mappings    ProductMapping[]
+
+  @@index([questionId, position])
+}
+
+model LogicRule {
+  id               String @id @default(cuid())
+  quizId           String
+  quiz             Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  conditions       String @default("[]")
+  match            String @default("all")
+  action           String @default("show")
+  targetQuestionId String
+  position         Int    @default(0)
+
+  @@index([quizId])
+}
+
+model ProductMapping {
+  id               String  @id @default(cuid())
+  quizId           String
+  quiz             Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answerId         String?
+  answer           Answer? @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  shopifyProductId String
+  score            Int     @default(10)
+
+  @@index([quizId])
+  @@index([answerId])
+}
+
+model ShopifyProduct {
+  id               String           @id @default(cuid())
+  shopId           String
+  shop             Shop             @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopifyId        String
+  title            String
+  handle           String
+  imageUrl         String           @default("")
+  status           String           @default("ACTIVE")
+  price            String           @default("")
+  defaultVariantId String           @default("")
+  updatedAt        DateTime         @updatedAt
+  variants         ShopifyVariant[]
+
+  @@unique([shopId, shopifyId])
+}
+
+model ShopifyVariant {
+  id        String         @id @default(cuid())
+  productId String
+  product   ShopifyProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  shopifyId String
+  title     String
+  price     String
+  available Boolean        @default(true)
+
+  @@unique([productId, shopifyId])
+}
+
+model QuizCustomer {
+  id        String        @id @default(cuid())
+  shopId    String
+  shop      Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  name      String        @default("")
+  age       Int?
+  ageRange  String        @default("")
+  createdAt DateTime      @default(now())
+  sessions  QuizSession[]
+
+  @@index([shopId, createdAt])
+}
+
+model QuizSession {
+  id          String        @id @default(cuid())
+  shopId      String
+  shop        Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  quizId      String
+  quiz        Quiz          @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  customerId  String?
+  customer    QuizCustomer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  status      String        @default("started")
+  startedAt   DateTime      @default(now())
+  completedAt DateTime?
+
+  responses       QuizResponse[]
+  recommendations Recommendation[]
+  events          AnalyticsEvent[]
+
+  @@index([shopId, startedAt])
+  @@index([quizId])
+}
+
+model QuizResponse {
+  id           String      @id @default(cuid())
+  sessionId    String
+  session      QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     Question    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerIds    String      @default("")
+  textValue    String      @default("")
+  numericValue Int?
+
+  @@unique([sessionId, questionId])
+}
+
+model Recommendation {
+  id               String      @id @default(cuid())
+  sessionId        String
+  session          QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  shopifyProductId String
+  variantId        String      @default("")
+  title            String
+  handle           String
+  imageUrl         String      @default("")
+  price            String      @default("")
+  score            Int
+  explanation      String      @default("")
+  rank             Int
+
+  @@index([sessionId, rank])
+}
+
+model AnalyticsEvent {
+  id        String       @id @default(cuid())
+  shopId    String
+  shop      Shop         @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  quizId    String?
+  quiz      Quiz?        @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  sessionId String?
+  session   QuizSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  eventType String
+  metadata  String       @default("{}")
+  createdAt DateTime     @default(now())
+
+  @@index([shopId, eventType])
+  @@index([quizId, eventType])
+  @@index([sessionId, createdAt])
+}

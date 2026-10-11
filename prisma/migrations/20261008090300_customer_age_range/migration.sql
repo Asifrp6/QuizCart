@@ -1,0 +1,1 @@
+ALTER TABLE "QuizCustomer" ADD COLUMN "ageRange" TEXT NOT NULL DEFAULT '';

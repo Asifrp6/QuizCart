@@ -1,0 +1,45 @@
+<div
+  class="quizcart-root"
+  data-handle="{{ block.settings.quiz_handle | escape }}"
+  data-heading="{{ block.settings.heading | escape }}"
+  data-runtime-url="{{ 'quizcart-runtime.js' | asset_url | escape }}"
+  role="region"
+  aria-label="{{ block.settings.heading | default: 'QuizCart quiz' | escape }}"
+  aria-busy="true"
+  {{ block.shopify_attributes }}
+>
+  <p class="quizcart-loading" role="status">
+    Loading your personalized quiz…
+  </p>
+  <noscript>
+    <p class="quizcart-error">
+      Enable JavaScript in your browser to take this quiz.
+    </p>
+  </noscript>
+</div>
+
+{% schema %}
+{
+  "name": "QuizCart quiz",
+  "target": "section",
+  "stylesheet": "quizcart.css",
+  "javascript": "quizcart.js",
+  "enabled_on": {
+    "templates": ["index", "product", "page"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Find your match"
+    },
+    {
+      "type": "text",
+      "id": "quiz_handle",
+      "label": "Quiz handle",
+      "info": "Leave this blank to show your published quiz. Paste a handle only when the store has more than one published quiz."
+    }
+  ]
+}
+{% endschema %}

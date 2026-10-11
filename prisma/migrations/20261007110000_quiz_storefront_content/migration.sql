@@ -1,0 +1,2 @@
+ALTER TABLE "Quiz" ADD COLUMN "welcomeImageUrl" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "Answer" ADD COLUMN "description" TEXT NOT NULL DEFAULT '';

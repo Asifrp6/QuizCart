@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "QuizCart Tunnel Preview",
+			"type": "shell",
+			"command": "SHOPIFY_CLI_AGENT_INFO='n:none|v:none|p:none|m:none' npm.cmd run dev",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
